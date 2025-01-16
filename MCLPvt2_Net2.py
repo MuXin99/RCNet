@@ -1,6 +1,5 @@
 
 from backbone.PVTv2.pvtv2_encoder import pvt_v2_b0
-
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -9,7 +8,6 @@ import pywt
 import numpy as np
 from model.norm import BasicConv2d
 from torch_geometric.nn import ChebConv
-
 
 class GraphWaveletTransform(nn.Module):
     def __init__(self, in_channels, out_channels, K=3):
@@ -20,7 +18,6 @@ class GraphWaveletTransform(nn.Module):
         out = self.cheb_conv(x, edge_index)
         return out
 
-
 class DAHM(nn.Module):
     def __init__(self, out_x):
         super(DAHM, self).__init__()
@@ -29,7 +26,7 @@ class DAHM(nn.Module):
         self.up = nn.Upsample(scale_factor=0.5, mode="bilinear")
         self.b_1 = nn.Conv2d(in_x, out_x, kernel_size=1)
         self.wavelet = 'db2'  # 选择小波基函数
-        self.phase_conv = nn.Conv2d(3, out_x, kernel_size=1)  # 使用3D卷积处理相位信息
+        self.phase_conv = nn.Conv2d(3, out_x, kernel_size=1) 
         self.graph_wavelet = GraphWaveletTransform(out_x, out_x)
         self.feature_weights = nn.Sequential(
             nn.Conv2d(out_x, out_x, kernel_size=1),
@@ -45,15 +42,11 @@ class DAHM(nn.Module):
         for c in range(C):
             coeffs1 = pywt.dwt2(x1_np[:, c], self.wavelet)
             coeffs2 = pywt.dwt2(x2_np[:, c], self.wavelet)
-
             _, (LH1, HL1, HH1) = coeffs1
             _, (LH2, HL2, HH2) = coeffs2
-
             phase_LH = np.angle(LH1 + LH2) / 2
             phase_HL = np.angle(HL1 + HL2) / 2
             phase_HH = np.angle(HH1 + HH2) / 2
-
-            # 堆叠相位
             phases.append(np.stack([phase_LH, phase_HL, phase_HH], axis=1))
 
         phases = np.stack(phases, axis=2)
@@ -221,33 +214,11 @@ class MCLPvt_Net2(nn.Module):
         T2 = F.interpolate(self.side_fusion2(out2), size=raw_size, mode='bilinear')
         T1 = self.fusion(out1, out2)
         T1 = F.interpolate(self.linear_out(T1), size=raw_size, mode='bilinear')
-        return T1, T2, T3,out3,out2,out1
+        return T1, T2, T3
 
     def forward(self, input):
         rgb = input[:, :3]
         modal_x = input[:, 3:]
         modal_x = torch.cat((modal_x, modal_x, modal_x), dim=1)
-
         T1, T2, T3,out3,out2,out1 = self.encode_decode(rgb, modal_x)
-
-        return T1, T2, T3#,out3,out2,out1
-
-
-if __name__ == '__main__':
-    model = MCLPvt_Net2().eval()
-    a = torch.randn(2, 3, 288, 512)
-    b = torch.randn(2, 1, 288, 512)
-    images = torch.cat((a, b), dim=1)
-    out = model(images)
-
-    for i in range(len(out)):
-        print(out[i].shape)
-    # from util.util import compute_speed
-    # from ptflops import get_model_complexity_info
-    # with torch.cuda.device(0):
-    #     net = work3().cuda()
-    #     flops, params = get_model_complexity_info(net, (4, 288, 512), as_strings=True, print_per_layer_stat=False)
-    #     print('Flops: ' + flops)
-    #     print('Params: ' + params)
-    #
-    # compute_speed(net, input_size=(1, 4, 288, 512), iteration=500)
+        return T1, T2, T3
