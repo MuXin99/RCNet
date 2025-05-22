@@ -88,9 +88,9 @@ class MCLDfoNet1(nn.Module):
 
         raw_size = x.size()[2:]
         fuse1 = s1
-        fuse2 = self.fuse3(s2, fuse1)  # [512]
-        fuse3 = self.fuse2(s3, fuse2)  # [1024]
-        fuse4 = self.fuse1(s4, fuse3)  # [2048]
+        fuse2 = self.fuse3(s2, fuse1)  
+        fuse3 = self.fuse2(s3, fuse2)  
+        fuse4 = self.fuse1(s4, fuse3) 
 
         out3 = self.decode_f3(fuse3, fuse4)
         out2 = self.decode_f2(fuse2, out3)
