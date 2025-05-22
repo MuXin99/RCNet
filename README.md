@@ -1,4 +1,4 @@
-# RCNet: Resonance Collaborative Network via Mutual Learning for RGB-D Road Defect Detection
+# RCNet: Dual-Network Resonance Collaboration via Mutual Learning for RGB-D Road Defect Detection
 
 
 # Results
