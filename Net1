@@ -5,7 +5,7 @@ from backbone.DFormer.DFormer import DFormer_Tiny
 import torch.nn.functional as F
 import os
 from Model.model.MINE.norm import BasicConv2d
-from Model.MedMamba.MedMamba import SS2D
+from Model.Mamba import SS2D
 
 class END(nn.Module):
     def __init__(self, in_channel):
@@ -39,9 +39,9 @@ class decode_f(nn.Module):
         out = self.conv3(torch.cat((decode_f1, global_fusion1), dim=1))
         return out
 
-class DFFM(nn.Module):
+class MSPM(nn.Module):
     def __init__(self, in_x):
-        super(DFFM, self).__init__()
+        super(MSPM, self).__init__()
         self.up = nn.Upsample(scale_factor=0.5, mode='bilinear', align_corners=False)
         self.y = nn.Conv2d(in_x, in_x, kernel_size=3, padding=1)
         self.horizontal_edge = BasicConv2d(in_channel=in_x//2, out_channel=in_x, kernel_size=(1, 3), padding=(0, 1))
@@ -64,9 +64,9 @@ class MCLDfoNet1(nn.Module):
     def __init__(self, inc=128):
         super(MCLDfoNet1, self).__init__()
         self.dformer = DFormer_Tiny(pretrained=True)
-        self.fuse3 = DFFM(64)
-        self.fuse2 = DFFM(128)
-        self.fuse1 = DFFM(256)
+        self.fuse3 = MSPM(64)
+        self.fuse2 = MSPM(128)
+        self.fuse1 = MSPM(256)
         self.fusion = END(128)
 
         self.decode_f3 = decode_f(256, 128, version=1)
