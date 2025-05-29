@@ -4,8 +4,6 @@ import torch.nn as nn
 import torchvision
 from matplotlib import pyplot as plt
 from backbone.DFormer.DFormer import DFormer_Tiny
-from backbone.PVTv2.pvtv2_encoder import pvt_v2_b0
-from backbone.Segformer.mix_transformer import mit_b0, mit_b1
 import torch.nn.functional as F
 import os
 from Model.norm import BasicConv2d,CoordAtt
